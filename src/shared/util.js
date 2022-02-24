@@ -1,4 +1,6 @@
 /* @flow */
+// 对应 dist/vue.js 14行到379行
+
 
 export const emptyObject = Object.freeze({})
 

@@ -1,3 +1,14 @@
+# 源码阅读
+
+
+阅读文件：
+  **src/shared/util.js ->打包后 dist/vue.js  14-445  **
+
+附有注释笔记
+
+
+
+
 <p align="center"><a href="https://vuejs.org" target="_blank" rel="noopener noreferrer"><img width="100" src="https://vuejs.org/images/logo.png" alt="Vue logo"></a></p>
 
 <p align="center">

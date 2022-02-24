@@ -9,16 +9,32 @@
   (global = global || self, global.Vue = factory());
 }(this, function () { 'use strict';
 
-  /*  */
+  /* 14行到379行 */
 
   var emptyObject = Object.freeze({});
 
   // These helpers produce better VM code in JS engines due to their
   // explicitness and function inlining.
+  // 由于它们的显式性和函数内联，这些助手程序可以在JS引擎中生成更好的VM代码。  
+
+  // isUndef 是否是未定义
+  // 大家可能都知道ES3中undefined是可以被赋值的。
+  // 也可能知道ES5之后全局的undefined就不能赋值了。
+  // 但可能不知道局部的还是可以被赋值修改。
+  // (function () { var undefined = 10;console.log(undefined); })();    //10
+  
+  /**
+   * 另一种做法
+    export default function isUndefined(obj) {
+      return obj === void 0;
+    }
+   * @param {*} v 
+   * @returns 
+   */
   function isUndef (v) {
     return v === undefined || v === null
   }
-
+  // isDef 是否是已经定义
   function isDef (v) {
     return v !== undefined && v !== null
   }
@@ -33,6 +49,7 @@
 
   /**
    * Check if value is primitive.
+   * isPrimitive 判断值是否是原始值
    */
   function isPrimitive (value) {
     return (
@@ -48,6 +65,10 @@
    * Quick object check - this is primarily used to tell
    * Objects from primitive values when we know the value
    * is a JSON-compliant type.
+   * 快速对象检查
+   * 当我们知道对象的值是一个json兼容的类型时，这主要用于区分对象和原始值。
+   * 
+   * 去除 typeof null 是 'object' 的问题
    */
   function isObject (obj) {
     return obj !== null && typeof obj === 'object'
@@ -58,6 +79,9 @@
    */
   var _toString = Object.prototype.toString;
 
+  // 一个表示该对象的字符串。
+  // eg toRawType({})   打印 'Object'  即对象类型
+  //    toRawType(1)         'Number'
   function toRawType (value) {
     return _toString.call(value).slice(8, -1)
   }
@@ -65,6 +89,7 @@
   /**
    * Strict object type check. Only returns true
    * for plain JavaScript objects.
+   * 是否是纯对象
    */
   function isPlainObject (obj) {
     return _toString.call(obj) === '[object Object]'
@@ -76,6 +101,17 @@
 
   /**
    * Check if val is a valid array index.
+   * 是否是可用的数组索引值
+   * 
+   * Tips
+   * 全局 isFinite() 函数用来判断被传入的参数值是否为一个有限数值（finite number）。
+   * 在必要情况下，参数会首先转为一个数值。
+   * isFinite(Infinity);  // false
+   * isFinite(-Infinity); // false
+   * isFinite(0);         // true
+   * isFinite(2e64);      // true, 在更强壮的Number.isFinite(null)中将会得到false
+   * isFinite("0");       // true, 在更强壮的Number.isFinite('0')中将会得到false
+   * isFinite(NaN);       // false
    */
   function isValidArrayIndex (val) {
     var n = parseFloat(String(val));
@@ -92,6 +128,11 @@
 
   /**
    * Convert a value to a string that is actually rendered.
+   * 将值转换为实际呈现的字符串。
+   * 
+   * 区别
+   * JSON.stringify([12,23],null,2)      -> '[\n  12,\n  23\n]'
+   * String([12,23])                     ->'12,23'
    */
   function toString (val) {
     return val == null
@@ -104,6 +145,8 @@
   /**
    * Convert an input value to a number for persistence.
    * If the conversion fails, return original string.
+   * 将输入值转换为一个数字，以便持久化。
+   * 转换成数字。如果转换失败依旧返回原始字符串。
    */
   function toNumber (val) {
     var n = parseFloat(val);
@@ -113,10 +156,18 @@
   /**
    * Make a map and return a function for checking if a key
    * is in that map.
+   * 
+   * @param {*} str 一个以逗号分隔的字符串
+   * @param {*} expectsLowerCase 布尔值，是否小写
+   * @returns 创建一个map并返回一个函数来检查是否有key,返回的函数若检查到key返回true，否则undefined
+   * 
+   * 使用：let fn = makeMap('ab,cd,ef,gf')
+   * fn('ab')  // true
+   * fn('ac')  // undefined
    */
   function makeMap (
     str,
-    expectsLowerCase
+    expectsLowerCase 
   ) {
     var map = Object.create(null);
     var list = str.split(',');
@@ -130,16 +181,19 @@
 
   /**
    * Check if a tag is a built-in tag.
+   * 是否是内置的 tag
    */
   var isBuiltInTag = makeMap('slot,component', true);
 
   /**
    * Check if an attribute is a reserved attribute.
+   * 是否是保留的属性
    */
   var isReservedAttribute = makeMap('key,ref,slot,slot-scope,is');
 
   /**
    * Remove an item from an array.
+   * 移除数组中的中一项
    */
   function remove (arr, item) {
     if (arr.length) {
@@ -152,6 +206,12 @@
 
   /**
    * Check whether an object has the property.
+   * hasOwn检测是否是自己的属性，不是通过原型链向上查找的。
+   * .call 则是函数里 this 显示指定以为第一个参数，并执行函数。
+   * 
+   * eg
+   * hasOwn({__proto__: { a: 1 }}, 'a') // false
+   * hasOwn({ a: undefined }, 'a') // true
    */
   var hasOwnProperty = Object.prototype.hasOwnProperty;
   function hasOwn (obj, key) {
@@ -160,11 +220,19 @@
 
   /**
    * Create a cached version of a pure function.
+   * 创建一个纯函数的缓存版本
+   * 利用闭包特性，缓存数据
    */
   function cached (fn) {
-    var cache = Object.create(null);
+    var cache = Object.create(null);//创建一个空对象
     return (function cachedFn (str) {
       var hit = cache[str];
+      // hit 真值，则||后面不执行，否则执行后部分
+      // 若缓存里有str，则返回该值，否则设置后再取出
+      // eg c = undefined || (obj['a'] = 1)    ->1
+      //    c = 2 || (obj['a'] = 1)            ->2
+      // js 赋值语句有返回值，就是等号右边的值！
+      // 更多参考：https://jiangmq.blog.csdn.net/article/details/123112550
       return hit || (cache[str] = fn(str))
     })
   }
@@ -201,6 +269,7 @@
    */
 
   /* istanbul ignore next */
+  // 绑定填补
   function polyfillBind (fn, ctx) {
     function boundFn (a) {
       var l = arguments.length;
@@ -225,6 +294,7 @@
 
   /**
    * Convert an Array-like object to a real Array.
+   * 将数组类对象转换为实际的数组。
    */
   function toArray (list, start) {
     start = start || 0;
@@ -292,6 +362,13 @@
   /**
    * Check if two values are loosely equal - that is,
    * if they are plain objects, do they have the same shape?
+   * 检查两个值是否大致相等——也就是说，如果它们是普通对象，它们是否具有相同的形状?  
+   * 
+   * 由于数组、对象等是引用类型，所以两个内容看起来相等，严格相等都是不相等。
+      var a = {};
+      var b = {};
+      a === b; // false
+      a == b; // false
    */
   function looseEqual (a, b) {
     if (a === b) { return true }
@@ -302,7 +379,8 @@
         var isArrayA = Array.isArray(a);
         var isArrayB = Array.isArray(b);
         if (isArrayA && isArrayB) {
-          return a.length === b.length && a.every(function (e, i) {
+          //数组，长度相同，属性逐一比对
+          return a.length === b.length && a.every(function (e, i) { 
             return looseEqual(e, b[i])
           })
         } else if (a instanceof Date && b instanceof Date) {
@@ -310,6 +388,7 @@
         } else if (!isArrayA && !isArrayB) {
           var keysA = Object.keys(a);
           var keysB = Object.keys(b);
+          // 对象，属性相同，属性进行逐一比对
           return keysA.length === keysB.length && keysA.every(function (key) {
             return looseEqual(a[key], b[key])
           })
@@ -321,7 +400,7 @@
         /* istanbul ignore next */
         return false
       }
-    } else if (!isObjectA && !isObjectB) {
+    } else if (!isObjectA && !isObjectB) {//非对象类型
       return String(a) === String(b)
     } else {
       return false
@@ -332,6 +411,10 @@
    * Return the first index at which a loosely equal value can be
    * found in the array (if value is a plain object, the array must
    * contain an object of the same shape), or -1 if it is not present.
+   * 
+   * 该函数实现的是宽松相等。原生的 indexOf 是严格相等。
+   * 返回第一个松散相等的在数组中找到索引
+   * (如果value是普通对象，数组必须包含一个相同形状的对象)，或者-1如果它不存在。
    */
   function looseIndexOf (arr, val) {
     for (var i = 0; i < arr.length; i++) {
@@ -342,6 +425,14 @@
 
   /**
    * Ensure a function is called only once.
+   * 确保一个函数只被调用一次。
+   * 闭包原理
+   * eg
+   * const fn = once(function(){
+   *   console.log('无论你怎么调用，我只执行一次');
+   * });
+   * fn() //无论你怎么调用，我只执行一次
+   * fn() 无输出
    */
   function once (fn) {
     var called = false;
