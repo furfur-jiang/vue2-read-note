@@ -9,7 +9,7 @@
   (global = global || self, global.Vue = factory());
 }(this, function () { 'use strict';
 
-  /* 14行到379行 */
+  /* 阅读14行到379行 */
 
   var emptyObject = Object.freeze({});
 
