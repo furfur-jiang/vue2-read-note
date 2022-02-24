@@ -1,8 +1,7 @@
 # 源码阅读
 
-
 阅读文件：
-  **src/shared/util.js ->打包后 dist/vue.js  14-445  **
+  **src/shared/util.js ->打包后 dist/vue.js  14-445**
 
 附有注释笔记
 
